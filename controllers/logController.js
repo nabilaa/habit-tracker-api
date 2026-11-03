@@ -62,9 +62,10 @@ export const getRange = async (req, res) => {
 
 export const getHeatMapData = async (req, res) => {
     try {
-        const days = last90DaysKeys;
+        const days = last90DaysKeys();
         const logs = await HabitLog.find({ userId: req.user._id, completedDate: { $gte: days[0], $lte: days[days.length - 1] } });
         const counts = {};
+
         for (const day of days) {
             counts[day] = 0;
         }
@@ -124,7 +125,7 @@ export const getHabitStats = async (req, res) => {
 export const getAllStats = async (req, res) => {
     try {
         const habits = await Habit.find({ userId: req.user._id, isArchived: false });
-        const days = lastNDays(30);
+        const days = lastNDaysKeys(30);
         const logs = await HabitLog.find({ userId: req.user._id, completedDate: { $gte: days[0], $lte: days[days.length - 1] } });
 
         const habitStats = habits.map(habit => {
@@ -144,7 +145,7 @@ export const getAllStats = async (req, res) => {
             };
         });
 
-        res.status(200).json(habitStats, days);
+        res.status(200).json({habitStats, days});
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server error" });
