@@ -19,7 +19,7 @@ import { todayKey, last90DaysKeys, currentWeekKeys, lastNDaysKeys, calculateStre
         );
         res.status(200).json({ message: "Habit marked as completed", log });
     } catch (error) {
-        console.error(error);
+        console.error("Error marking habit as completed:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -31,7 +31,7 @@ export const umarkCompleted = async (req, res) => {
         await HabitLog.findOneAndDelete({ userId: req.user._id, habitId, completedDate });
         res.status(200).json({ message: "Habit unmarked as completed" });
     } catch (error) {
-        console.error(error);
+        console.error("Error unmarking habit as completed:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -41,7 +41,7 @@ export const getTodayLogs = async (req, res) => {
         const logs = await HabitLog.find({ userId: req.user._id, completedDate: todayKey() });
         res.status(200).json(logs);
     } catch (error) {
-        console.error(error);
+        console.error("Error retrieving today's logs:", error);
         res.status(500).json({ message: "Server error" });
     }   
 };
@@ -55,7 +55,7 @@ export const getRange = async (req, res) => {
         });
         res.status(200).json(logs);
     } catch (error) {
-        console.error(error);
+        console.error("Error retrieving habit logs by date range:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -79,7 +79,7 @@ export const getHeatMapData = async (req, res) => {
         res.status(200).json(heatMapData);
     }
     catch (error) {
-        console.error(error);
+        console.error("Error retrieving habit heat map data:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -93,7 +93,7 @@ export const getHabitStats = async (req, res) => {
 
         const logs = await HabitLog.find({ userId: req.user._id, habitId: habit._id }).sort({ completedDate: -1 });
         const completedDates = logs.map(log => log.completedDate);
-        const { current, longest } = calculateStreak(completedDates);
+        const { current: currentStreak, longest: longestStreak } = calculateStreak(completedDates);
 
         const createdAt = habit.createdAt.toISOString().split('T')[0];
         const today = todayKey();
@@ -111,13 +111,13 @@ export const getHabitStats = async (req, res) => {
         res.status(200).json({
             habit,
             totalCompletions: completedDates.length,
-            currentStreak: current,
-            longestStreak: longest,
+            currentStreak,
+            longestStreak,
             completionRate: completionRate.toFixed(2),
             monthlyCompletion
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error retrieving habit statistics:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -131,7 +131,7 @@ export const getAllStats = async (req, res) => {
         const habitStats = habits.map(habit => {
             const habitLogs = logs.filter(log => log.habitId.toString() === habit._id.toString());
             const completedDates = habitLogs.map(log => log.completedDate);
-            const { current, longest } = calculateStreak(completedDates);
+            const { current: currentStreak, longest: longestStreak } = calculateStreak(completedDates);
 
             return {
                 habitId: habit._id,
@@ -140,14 +140,14 @@ export const getAllStats = async (req, res) => {
                 color: habit.color,
                 category: habit.category,
                 completions30d: habitLogs.length,
-                currentStreak: current,
-                longestStreak: longest
+                currentStreak,
+                longestStreak
             };
         });
 
         res.status(200).json({habitStats, days});
     } catch (error) {
-        console.error(error);
+        console.error("Error retrieving all habit statistics:", error);
         res.status(500).json({ message: "Server error" });
     }
 };

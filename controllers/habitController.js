@@ -80,7 +80,7 @@ export const updateHabit = async (req, res) => {
     }
 };
 
-const deleteHabit = async (req, res) => {
+export const deleteHabit = async (req, res) => {
     try {
         const habit = await Habit.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
         if (!habit) {
@@ -93,7 +93,7 @@ const deleteHabit = async (req, res) => {
     }
 };
 
-const archiveHabit = async (req, res) => {
+export const archiveHabit = async (req, res) => {
     try {
         const habit = await Habit.findOne({ _id: req.params.id, userId: req.user._id });    
     if (!habit) {
@@ -107,7 +107,22 @@ const archiveHabit = async (req, res) => {
     }
 };
 
-const reorderHabits = async (req, res) => {
+export const unarchiveHabit = async (req, res) => {
+    try {
+        const habit = await Habit.findOne({ _id: req.params.id, userId: req.user._id });    
+    if (!habit) {
+        return res.status(404).json({ message: "Habit not found." });
+    }
+    habit.isArchived = false;
+    await habit.save();
+    res.json({ message: "Habit unarchived successfully.", habit });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+export const reorderHabits = async (req, res) => {
     try {
         const { orderedIds } = req.body;
         if (!Array.isArray(orderedIds)) {
@@ -121,5 +136,3 @@ const reorderHabits = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-
-export { deleteHabit, archiveHabit, reorderHabits };
