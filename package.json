@@ -9,7 +9,8 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js"
   },
-  "dependencies" : {
+  "dependencies": {
+    "@google/genai": "^3.3.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "date-fns": "4.4.0",
